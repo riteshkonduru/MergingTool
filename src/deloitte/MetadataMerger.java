@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -109,7 +110,9 @@ public class MetadataMerger {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			DOMSource source = new DOMSource(doc);
-			MetadataMerger objMetaDataMerger = new MetadataMerger();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			//MetadataMerger objMetaDataMerger = new MetadataMerger();
 			//File destinationFile = objMetaDataMerger.getFile("doc2.xml");
 			StreamResult result = new StreamResult(new File("/Users/rkonduru/Desktop/destinationPackage.xml"));
 
