@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<package>
+<types>
+    <members>DATG_Utility_HttpMockCallout</members>
+    <members>DATG_JITHandler_Test</members>
+    <members>TriggerHandler_Test</members>
+    <members>DATG_CampaignJunctionTrigger_Test</members>
+    <members>DATG_BatchToCalculateSatelliteOnAct_Test</members>
+    <members>RiteshDATG_Utility_HttpMockCallout</members>
+    <name>ApexClass</name>
+</types>
+ <!-- 
+<types>
+    <members>DATG_FilePreview</members>
+    <name>ApexPage</name>
+</types>
+<types>
+    <members>DATG_SeasonTrigger</members>
+    <members>DATG_ActivitiesTrigger</members>
+    <members>DATG_CampaignTeamMemberTrigger</members>
+    <name>ApexTrigger</name>
+</types>
+
+<types>
+    <members>DATG_ActivityTeamMemberNotification</members>
+    <members>DATG_Send_Email_To_Members</members>
+    <members>NGG_ActivityTeamMemberNotification</members>
+    <name>EmailTemplate</name>
+</types>
+<types>
+    <members>customLookupResult</members>
+    <members>DATG_Banner</members>
+    <members>selectedsObjectRecordEvent</members>
+    <name>AuraDefinitionBundle</name>
+</types>
+<types>
+    <members>DATG_Home_Page_Planning</members>
+    <members>DATG_Home_Page_Writer_Producer</members>
+    <name>FlexiPage</name>
+</types>
+<types>
+    <members>Activity__c.Update_Activity_Checkboxes</members>
+    <members>Activity__c.Update_Activity_Notes</members>
+    <members>Activity__c.Update_Activity_Dates</members>
+    <name>QuickAction</name>
+</types>
+<types>
+    <members>DATG_Constants__c</members>
+    <members>DATG_Services__c</members>
+    <members>DATG_Profile_and_Business_Unit_Mapping__c</members>
+    <members>Radar_Mapping__c</members>
+    <name>CustomObject</name>
+</types>
+<types>
+    <members>User.Business_Unit__c</members>
+    <name>CustomField</name>
+</types>
+<types>
+    <members>Campaign_Planning</members>
+    <name>CustomApplication</name>
+</types>
+<types>
+    <members>Project__c</members>
+    <members>Property__c</members>
+    <members>Season__c</members>
+    <members>Team_Template__c</members>
+    <members>Version__c</members>
+    <name>CustomTab</name>
+</types>
+<types>
+    <members>Creative Director</members>
+    <members>MarketingProfile</members>
+    <members>Operations Traffic</members>
+    <members>Planning</members>
+    <members>Writer Producer</members>
+    <members>Admin</members>
+    <name>Profile</name>
+</types>
+<type>
+    <members>ABC/DATG_Strategy_Report</members>
+    <members>ABC/DATG_Super_Sign_Plan_Report</members>
+    <members>ABC/Trailer_Accounting_Report_vNK</members><members>ABC/Operations_Traffic_Report</members>  
+    <members>ABC/Operations_Traffic_Report_by_Final_Due</members>
+    <members>ABC/Operations_Traffic_Report_no_Show_Air</members>
+    <name>Report</name>
+</type>
+<types>
+    <members>Activity__c.Unassigned_Spots_Social</members>
+    <members>Activity__c.Unassigned_Video_Spots</members>
+    <members>Campaign__c.My_Campaigns</members>
+    <name>ListView</name>
+</types> -->
+<version>41.0</version>
+</package>
