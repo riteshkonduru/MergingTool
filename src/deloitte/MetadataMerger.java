@@ -18,7 +18,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-
+//TODO try for multiple tags.
+//TODO only add new tags which got created.
 
 public class MetadataMerger {
 
