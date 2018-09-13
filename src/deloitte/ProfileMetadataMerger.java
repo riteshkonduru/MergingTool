@@ -1,15 +1,15 @@
 package deloitte;
 
 import java.io.File;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -18,6 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import deloitte.ProfileElements;
 
 
 public class ProfileMetadataMerger {
@@ -28,7 +29,8 @@ public class ProfileMetadataMerger {
 			ProfileMetadataMerger objMetaDataMerger = new ProfileMetadataMerger();
 			Map<String, Map<String, String>> sourceMetadataMap = new HashMap<>();
 			Map<String, Map<String, String>> destinationMetadataMap = new HashMap<>();
-
+			Map<String, String> tempDestNew =new HashMap<>();
+			Map<String, Set<ProfileElements>> destinationMetadataMapNew = new HashMap<>();
 			File inputFile = new File("/Users/rkonduru/Desktop/sourcePackageProfile.xml");//objMetaDataMerger.getFile("doc1.xml");
 			sourceMetadataMap = objMetaDataMerger.handleProfileMerge(inputFile);
 			System.out.println("sourceMetadataMap: " + sourceMetadataMap);
@@ -44,119 +46,109 @@ public class ProfileMetadataMerger {
 					Map<String, String> tempDest = destinationMetadataMap.get(tempStr);
 					System.out.println("tempDest  + " + tempDest);
 					Map<String, String> tempSor =sourceMetadataMap.get(tempStr);
+					Set<ProfileElements> recProfileSet = new HashSet<>();
 					for(String tempstr1 :tempSor.keySet()) {
+						ProfileElements recProfile = new ProfileElements();
 						if(tempDest != null && !tempDest.containsKey(tempstr1) ) {
-							tempDest.put(tempstr1,tempSor.get(tempstr1));
-							System.out.println("tempDest  + " + tempDest);
+							tempDestNew.put(tempstr1,tempSor.get(tempstr1));
+							recProfile.setName(tempstr1);
+							recProfile.setEnabled(tempSor.get(tempstr1));
+							System.out.println("tempDestNew  + " + tempDestNew);
 						}
 						else if(tempDest != null && tempDest.containsKey(tempstr1) ) {
 							if(!tempDest.get(tempstr1).equals(tempSor.get(tempstr1))) {
-								
-								tempDest.put(tempstr1,tempSor.get(tempstr1));
-								System.out.println("tempDest  + " + tempDest);
+
+								tempDestNew.put(tempstr1,tempSor.get(tempstr1));
+								recProfile.setName(tempstr1);
+								recProfile.setEnabled(tempSor.get(tempstr1));
+								System.out.println("tempDestNew  + " + tempDestNew);
 							}
 						}
-						destinationMetadataMap.put(tempStr, tempDest);
+						recProfileSet.add(recProfile);
 					}
-					System.out.println("destinationMetadataMap  + " + destinationMetadataMap);
+					destinationMetadataMapNew.put(tempStr, recProfileSet);
 				}
+				System.out.println("destinationMetadataMapNew  + " + destinationMetadataMapNew);
 			}
-			
-			objMetaDataMerger.createDestinationXml(destinationMetadataMap);
+
+			objMetaDataMerger.createDestinationXml(destinationMetadataMapNew, destinationFile);
 
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	public void createDestinationXml(Map<String, Map<String, String>> destinationMetadataMap) {
-
-
+	public void createDestinationXml(Map<String, Set<ProfileElements>> destinationMetadataMapNew, File destinationFile) {
 		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document docDestinationFile = dBuilder.parse(destinationFile);
+			docDestinationFile.getDocumentElement().normalize();
 
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-			// root elements
-			Document doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("package");
-			doc.appendChild(rootElement);
-
-			
-			Element type = doc.createElement("type");
-			rootElement.appendChild(type);
-			//Version element
-			Element version = doc.createElement("version");
-			version.appendChild(doc.createTextNode("41.0"));//TODO
-			rootElement.appendChild(version);
-
-			if(destinationMetadataMap != null) {
-				for(String tempSetStr: destinationMetadataMap.keySet()) {
-					Set<String> tempValues = destinationMetadataMap.get(tempSetStr);
-					if(tempValues != null) {
-						for(String tempS : tempValues) {
-							Element members = doc.createElement("members");
-							members.appendChild(doc.createTextNode(tempS));
-							type.appendChild(members);
+			for(String tempTypes: destinationMetadataMapNew.keySet()){
+				Set<ProfileElements> tempValues = destinationMetadataMapNew.get(tempTypes);
+				if(tempValues.size() >0) {
+					for(ProfileElements tempProfile : tempValues) {
+						if(tempProfile.getName() != null && tempProfile.getEnabled() != null){
+							System.out.println("Name + " + tempProfile.getName() + " Enabled + " + tempProfile.getEnabled());
+							Element root = docDestinationFile.getDocumentElement();
+							Element name = docDestinationFile.createElement("classAccesses");
+							Element apexClass = docDestinationFile.createElement("apexClass");
+							apexClass.appendChild(docDestinationFile.createTextNode(tempProfile.getName())); 
+							Element apexClassEnable = docDestinationFile.createElement("enabled");
+							apexClassEnable.appendChild(docDestinationFile.createTextNode(tempProfile.getEnabled()));
+							name.appendChild(apexClass);
+							name.appendChild(apexClassEnable);
+							root.appendChild(name);	
 						}
 					}
-					Element name = doc.createElement("name");
-					name.appendChild(doc.createTextNode(tempSetStr));
-					type.appendChild(name);
-				}
+				}	
 			}
-
-
+			prettyPrint(docDestinationFile);
 			// write the content into xml file
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
-			DOMSource source = new DOMSource(doc);
+			DOMSource source = new DOMSource(docDestinationFile);
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			//MetadataMerger objMetaDataMerger = new MetadataMerger();
-			//File destinationFile = objMetaDataMerger.getFile("doc2.xml");
-			StreamResult result = new StreamResult(new File("/Users/rkonduru/Desktop/destinationPackage.xml"));
+			StreamResult result = new StreamResult(new File("/Users/rkonduru/Desktop/destinationPackageProfile.xml"));
 
 			transformer.transform(source, result);
 			System.out.println("File saved!");
-
-		} catch (ParserConfigurationException pce) {
-			pce.printStackTrace();
-		} catch (TransformerException tfe) {
-			tfe.printStackTrace();
-		}
-
+		}catch (Exception e) {
+			e.printStackTrace();
+		}	
 
 	}
 	public  Map<String, Map<String, String>> handleProfileMerge(File inputFile1) {
 		Map<String, Map<String, String>> mapNodeData = new HashMap<>();
 		NodeList nList;
 		try {
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		Document doc1 = dBuilder.parse(inputFile1);
-		doc1.getDocumentElement().normalize();
-		
-		nList = doc1.getElementsByTagName("classAccesses");
-		if(nList.getLength() > 0){
-			mapNodeData.putAll(createNodemap(nList,"classAccesses","apexClass"));
-		}
-		nList = doc1.getElementsByTagName("pageAccesses");
-		if(nList.getLength() > 0){
-			mapNodeData.putAll(createNodemap(nList,"pageAccesses","apexPage"));
-		}
-		nList = doc1.getElementsByTagName("userPermissions");
-		if(nList.getLength() > 0){
-			mapNodeData.putAll(createNodemap(nList,"userPermissions","name"));
-		}
-		System.out.println("mapNodeData : " + mapNodeData.size());
-		return mapNodeData;
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc1 = dBuilder.parse(inputFile1);
+			doc1.getDocumentElement().normalize();
+
+			nList = doc1.getElementsByTagName("classAccesses");
+			if(nList.getLength() > 0){
+				mapNodeData.putAll(createNodemap(nList,"classAccesses","apexClass"));
+			}
+			nList = doc1.getElementsByTagName("pageAccesses");
+			if(nList.getLength() > 0){
+				mapNodeData.putAll(createNodemap(nList,"pageAccesses","apexPage"));
+			}
+			nList = doc1.getElementsByTagName("userPermissions");
+			if(nList.getLength() > 0){
+				mapNodeData.putAll(createNodemap(nList,"userPermissions","name"));
+			}
+			System.out.println("mapNodeData : " + mapNodeData.size());
+			return mapNodeData;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return mapNodeData;
 	}
-	
+
 	public static Map<String, Map<String, String>> createNodemap(NodeList nList,String keyType,String tagName){		
 		Map<String, Map<String, String >> mapNodeData = new HashMap<>();
 		Map<String, String> mapNodeElementData = new HashMap<>();
@@ -175,5 +167,15 @@ public class ProfileMetadataMerger {
 			mapNodeData.put(keyType,mapNodeElementData);
 		}
 		return mapNodeData;
+	}
+	public static final void prettyPrint(Document xml) throws Exception {
+
+		Transformer tf = TransformerFactory.newInstance().newTransformer();
+		tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		tf.setOutputProperty(OutputKeys.INDENT, "yes");
+		Writer out = new StringWriter();
+		tf.transform(new DOMSource(xml), new StreamResult(out));
+		System.out.println(out.toString());
+
 	}
 }
