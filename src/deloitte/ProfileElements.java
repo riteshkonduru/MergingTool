@@ -4,6 +4,7 @@ public class ProfileElements {
 
     private String name;
     private String enabled;
+    private String preparedKey;
 
     public String getName() {
         return name;
@@ -17,10 +18,16 @@ public class ProfileElements {
     public void setEnabled(String enabled) {
         this.enabled = enabled;
     }
+    public String getPreparedKey() {
+        return preparedKey;
+    }
+    public void setPreparedKey(String preparedKey) {
+        this.preparedKey = preparedKey; //name-enabled
+    }
 
     @Override
     public String toString() {
-        return "Profile:: Name=" + this.name  + " Enabled=" + this.enabled ;
+        return "Profile:: Name=" + this.name  + " Enabled=" + this.enabled +" PreparedKey=" + this.preparedKey ;
     }
     
 }

@@ -1,8 +1,10 @@
 package deloitte;
 
+import java.awt.List;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +21,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import deloitte.ProfileElements;
+import deloitte.UpdateProfileWrapElements;
 
 
 public class ProfileMetadataMerger {
@@ -27,10 +30,12 @@ public class ProfileMetadataMerger {
 	public static void main(String[] args) {
 		try {
 			ProfileMetadataMerger objMetaDataMerger = new ProfileMetadataMerger();
-			Map<String, Map<String, String>> sourceMetadataMap = new HashMap<>();
-			Map<String, Map<String, String>> destinationMetadataMap = new HashMap<>();
-			Map<String, String> tempDestNew =new HashMap<>();
+			Map<String, Set<ProfileElements>> sourceMetadataMap = new HashMap<>();
+			Map<String, Set<ProfileElements>> destinationMetadataMap = new HashMap<>();
 			Map<String, Set<ProfileElements>> destinationMetadataMapNew = new HashMap<>();
+			ArrayList<UpdateProfileWrapElements> destinationMetadataWrapNew = new ArrayList<UpdateProfileWrapElements>();
+			Map<String, ProfileElements> recProfilesTOADDSource = new HashMap<>();
+			Map<String, ProfileElements> recProfilesTOADDDest =  new HashMap<>();
 			File inputFile = new File("/Users/rkonduru/Desktop/sourcePackageProfile.xml");//objMetaDataMerger.getFile("doc1.xml");
 			sourceMetadataMap = objMetaDataMerger.handleProfileMerge(inputFile);
 			System.out.println("sourceMetadataMap: " + sourceMetadataMap);
@@ -38,57 +43,79 @@ public class ProfileMetadataMerger {
 			File destinationFile = new File("/Users/rkonduru/Desktop/destinationPackageProfile.xml");//objMetaDataMerger.getFile("doc2.xml");
 			destinationMetadataMap = objMetaDataMerger.handleProfileMerge(destinationFile);
 			System.out.println("destinationMetadataMap: " + destinationMetadataMap);
-			//tags logic
-			if(sourceMetadataMap != null && destinationMetadataMap != null ) {
-				Set<String> tempSource = sourceMetadataMap.keySet();
-				System.out.println(tempSource);
-				for(String tempStr: tempSource) {
-					Map<String, String> tempDest = destinationMetadataMap.get(tempStr);
-					System.out.println("tempDest  + " + tempDest);
-					Map<String, String> tempSor =sourceMetadataMap.get(tempStr);
+			//tags logic starts here
+			if(sourceMetadataMap != null && destinationMetadataMap != null ) {//Map<classAccesses, Map<TestClass3Name, enableTrue>>
+				Set<String> tempSource = sourceMetadataMap.keySet();//tempSource == classAccesses,pageAccesses,userPermissions
+				System.out.println("tempSource " + tempSource.size() + "  " + tempSource);
+				UpdateProfileWrapElements tempWrapElements = new UpdateProfileWrapElements();
+				for(String tempStr: tempSource) {//tempStr == classAccesses
+					Set<ProfileElements> tempDest = destinationMetadataMap.get(tempStr);//Map<TestClass3Name, enableTrue>
+					System.out.println("tempDest  + " + tempDest.size() + "  " + tempDest);
+					Set<ProfileElements> tempSor =sourceMetadataMap.get(tempStr);//Map<TestClass3Name, enableTrue>
+					System.out.println("tempSor  + " + tempSor.size() + "  " + tempSor);
 					Set<ProfileElements> recProfileSet = new HashSet<>();
-					for(String tempstr1 :tempSor.keySet()) {
-						ProfileElements recProfile = new ProfileElements();
-						if(tempDest != null && !tempDest.containsKey(tempstr1) ) {
-							tempDestNew.put(tempstr1,tempSor.get(tempstr1));
-							recProfile.setName(tempstr1);
-							recProfile.setEnabled(tempSor.get(tempstr1));
-							System.out.println("tempDestNew  + " + tempDestNew);
-						}
-						else if(tempDest != null && tempDest.containsKey(tempstr1) ) {
-							if(!tempDest.get(tempstr1).equals(tempSor.get(tempstr1))) {
-
-								tempDestNew.put(tempstr1,tempSor.get(tempstr1));
-								recProfile.setName(tempstr1);
-								recProfile.setEnabled(tempSor.get(tempstr1));
-								System.out.println("tempDestNew  + " + tempDestNew);
+					Set<ProfileElements> recProfileSetRemove = new HashSet<>();
+					for(ProfileElements tempstr1 :tempSor) {//tempstr1 ==TestClass3Name ,enableTrue,TestClass3Name-enableTrue
+						recProfilesTOADDSource.put(tempstr1.getPreparedKey() ,tempstr1);
+						for(ProfileElements tempstrDest1 :tempDest) {
+							recProfilesTOADDDest.put(tempstrDest1.getPreparedKey(), tempstrDest1);
+							if(tempstr1.getName().equals(tempstrDest1.getName())) {//recProfileElements.getPreparedKey
+								if(!tempstr1.getPreparedKey().equals(tempstrDest1.getPreparedKey())) {
+									recProfileSet.add(tempstr1);
+									recProfileSetRemove.add(tempstrDest1);
+								}
 							}
 						}
-						recProfileSet.add(recProfile);
 					}
-					destinationMetadataMapNew.put(tempStr, recProfileSet);
+					System.out.println("recProfilesTOADDSource  + " + recProfilesTOADDSource.size() + "  " + recProfilesTOADDSource);
+					System.out.println("recProfilesTOADDDest  + " + recProfilesTOADDDest.size() + "  " + recProfilesTOADDDest);
+					for(String tempStrTOAddNewSrc: recProfilesTOADDSource.keySet()) {
+
+						if(!recProfilesTOADDDest.containsKey(tempStrTOAddNewSrc)) {
+							recProfileSet.add(recProfilesTOADDSource.get(tempStrTOAddNewSrc));
+						}
+
+					}
+
+					tempWrapElements.setNameType(tempStr);
+					tempWrapElements.setProfileSet(recProfileSet);
+					tempWrapElements.setProfileSetRemove(recProfileSetRemove);
+					destinationMetadataWrapNew.add(tempWrapElements);//this is for updating in enable tag under a class
+					//destinationMetadataMapNew.put(tempStr, recProfileSet);
 				}
-				System.out.println("destinationMetadataMapNew  + " + destinationMetadataMapNew);
+				System.out.println("destinationMetadataWrapNew  + " + destinationMetadataWrapNew);
 			}
 
-			objMetaDataMerger.createDestinationXml(destinationMetadataMapNew, destinationFile);
+			objMetaDataMerger.updateDestinationXml(destinationMetadataWrapNew, destinationFile);
 
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	public void createDestinationXml(Map<String, Set<ProfileElements>> destinationMetadataMapNew, File destinationFile) {
+	/*if(tempDest != null && tempDest.containsKey(tempstr1) ) {
+								String tempS = tempSor.get(tempstr1);
+								if(tempDest.get(tempstr1).equals(tempSor.get(tempstr1))){//enableTrue
+									recProfile.setName(tempstr1);//TODO Get Profile Elements and update
+									recProfile.setEnabled(tempSor.get(tempstr1));
+								}
+							}
+							else {
+								recProfile.setName(tempstr1);
+								recProfile.setEnabled(tempSor.get(tempstr1));
+
+							}**/
+	public void updateDestinationXml( ArrayList<UpdateProfileWrapElements> destinationMetadataWrapNew, File destinationFile) {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document docDestinationFile = dBuilder.parse(destinationFile);
 			docDestinationFile.getDocumentElement().normalize();
 
-			for(String tempTypes: destinationMetadataMapNew.keySet()){
-				Set<ProfileElements> tempValues = destinationMetadataMapNew.get(tempTypes);
-				if(tempValues.size() >0) {
-					for(ProfileElements tempProfile : tempValues) {
+			for(UpdateProfileWrapElements tempTypes: destinationMetadataWrapNew){
+				Set<ProfileElements> tempProfileValuesToAdd = tempTypes.getProfileSet();
+				if(tempProfileValuesToAdd.size() >0) {
+					for(ProfileElements tempProfile : tempProfileValuesToAdd) {
 						if(tempProfile.getName() != null && tempProfile.getEnabled() != null){
 							System.out.println("Name + " + tempProfile.getName() + " Enabled + " + tempProfile.getEnabled());
 							Element root = docDestinationFile.getDocumentElement();
@@ -120,8 +147,8 @@ public class ProfileMetadataMerger {
 		}	
 
 	}
-	public  Map<String, Map<String, String>> handleProfileMerge(File inputFile1) {
-		Map<String, Map<String, String>> mapNodeData = new HashMap<>();
+	public  Map<String,Set<ProfileElements>> handleProfileMerge(File inputFile1) {
+		Map<String, Set<ProfileElements>> mapNodeData = new HashMap<>();
 		NodeList nList;
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -149,9 +176,11 @@ public class ProfileMetadataMerger {
 		return mapNodeData;
 	}
 
-	public static Map<String, Map<String, String>> createNodemap(NodeList nList,String keyType,String tagName){		
-		Map<String, Map<String, String >> mapNodeData = new HashMap<>();
+	public static Map<String, Set<ProfileElements>> createNodemap(NodeList nList,String keyType,String tagName){		
+		Map<String, Set<ProfileElements>> mapNodeData = new HashMap<>();
 		Map<String, String> mapNodeElementData = new HashMap<>();
+		Set<ProfileElements> setProfileElements = new HashSet<>();
+
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			Node nNode = nList.item(temp);
 			//System.out.println("\nnNode.getNodeType :" + nNode.getNodeType());
@@ -160,11 +189,16 @@ public class ProfileMetadataMerger {
 				Element eElement = (Element) nNode;
 				System.out.println("Name : " + eElement.getElementsByTagName(tagName).item(0).getTextContent());
 				mapNodeElementData.put(eElement.getElementsByTagName(tagName).item(0).getTextContent(),eElement.getElementsByTagName("enabled").item(0).getTextContent());//nNode);
+				ProfileElements recProfileElements = new ProfileElements();
+				recProfileElements.setName(eElement.getElementsByTagName(tagName).item(0).getTextContent());
+				recProfileElements.setEnabled(eElement.getElementsByTagName("enabled").item(0).getTextContent());
+				recProfileElements.setPreparedKey(eElement.getElementsByTagName(tagName).item(0).getTextContent()+"-"+eElement.getElementsByTagName("enabled").item(0).getTextContent());
+				setProfileElements.add(recProfileElements);
 			}
 		}
-		if(mapNodeElementData.size() > 0) {
-			System.out.println( "\n mapNodeElementData "+ keyType + " " +mapNodeElementData.size());
-			mapNodeData.put(keyType,mapNodeElementData);
+		if(setProfileElements.size() > 0) {
+			System.out.println( "\n mapNodeElementData "+ keyType + " " +setProfileElements.size());
+			mapNodeData.put(keyType,setProfileElements);
 		}
 		return mapNodeData;
 	}
