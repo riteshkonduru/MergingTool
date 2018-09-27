@@ -50,19 +50,21 @@ public class ProfileMetadataMerger {
 				UpdateProfileWrapElements tempWrapElements = new UpdateProfileWrapElements();
 				for(String tempStr: tempSource) {//tempStr == classAccesses
 					Set<ProfileElements> tempDest = destinationMetadataMap.get(tempStr);//Map<TestClass3Name, enableTrue>
-					System.out.println("tempDest  + " + tempDest.size() + "  " + tempDest);
+					//System.out.println("tempDest  + " + tempDest.size() + "  " + tempDest);
 					Set<ProfileElements> tempSor =sourceMetadataMap.get(tempStr);//Map<TestClass3Name, enableTrue>
-					System.out.println("tempSor  + " + tempSor.size() + "  " + tempSor);
+					//System.out.println("tempSor  + " + tempSor.size() + "  " + tempSor);
 					Set<ProfileElements> recProfileSet = new HashSet<>();
 					Set<ProfileElements> recProfileSetRemove = new HashSet<>();
 					for(ProfileElements tempstr1 :tempSor) {//tempstr1 ==TestClass3Name ,enableTrue,TestClass3Name-enableTrue
 						recProfilesTOADDSource.put(tempstr1.getPreparedKey() ,tempstr1);
-						for(ProfileElements tempstrDest1 :tempDest) {
-							recProfilesTOADDDest.put(tempstrDest1.getPreparedKey(), tempstrDest1);
-							if(tempstr1.getName().equals(tempstrDest1.getName())) {//recProfileElements.getPreparedKey
-								if(!tempstr1.getPreparedKey().equals(tempstrDest1.getPreparedKey())) {
-									recProfileSet.add(tempstr1);
-									recProfileSetRemove.add(tempstrDest1);
+						if(tempDest != null) {
+							for(ProfileElements tempstrDest1 :tempDest) {
+								recProfilesTOADDDest.put(tempstrDest1.getPreparedKey(), tempstrDest1);
+								if(tempstr1.getName().equals(tempstrDest1.getName())) {//recProfileElements.getPreparedKey
+									if(!tempstr1.getPreparedKey().equals(tempstrDest1.getPreparedKey())) {
+										recProfileSet.add(tempstr1);
+										recProfileSetRemove.add(tempstrDest1);
+									}
 								}
 							}
 						}
