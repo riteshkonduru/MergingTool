@@ -1,6 +1,5 @@
 package deloitte;
 
-import java.awt.List;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -32,7 +31,6 @@ public class ProfileMetadataMerger {
 			ProfileMetadataMerger objMetaDataMerger = new ProfileMetadataMerger();
 			Map<String, Set<ProfileElements>> sourceMetadataMap = new HashMap<>();
 			Map<String, Set<ProfileElements>> destinationMetadataMap = new HashMap<>();
-			Map<String, Set<ProfileElements>> destinationMetadataMapNew = new HashMap<>();
 			ArrayList<UpdateProfileWrapElements> destinationMetadataWrapNew = new ArrayList<UpdateProfileWrapElements>();
 			Map<String, ProfileElements> recProfilesTOADDSource = new HashMap<>();
 			Map<String, ProfileElements> recProfilesTOADDDest =  new HashMap<>();
@@ -47,8 +45,9 @@ public class ProfileMetadataMerger {
 			if(sourceMetadataMap != null && destinationMetadataMap != null ) {//Map<classAccesses, Map<TestClass3Name, enableTrue>>
 				Set<String> tempSource = sourceMetadataMap.keySet();//tempSource == classAccesses,pageAccesses,userPermissions
 				System.out.println("tempSource " + tempSource.size() + "  " + tempSource);
-				UpdateProfileWrapElements tempWrapElements = new UpdateProfileWrapElements();
+				
 				for(String tempStr: tempSource) {//tempStr == classAccesses
+					UpdateProfileWrapElements tempWrapElements = new UpdateProfileWrapElements();
 					Set<ProfileElements> tempDest = destinationMetadataMap.get(tempStr);//Map<TestClass3Name, enableTrue>
 					//System.out.println("tempDest  + " + tempDest.size() + "  " + tempDest);
 					Set<ProfileElements> tempSor =sourceMetadataMap.get(tempStr);//Map<TestClass3Name, enableTrue>
@@ -78,7 +77,8 @@ public class ProfileMetadataMerger {
 						}
 
 					}
-
+					recProfilesTOADDSource.clear();
+					recProfilesTOADDDest.clear();
 					tempWrapElements.setNameType(tempStr);
 					tempWrapElements.setProfileSet(recProfileSet);
 					tempWrapElements.setProfileSetRemove(recProfileSetRemove);
@@ -95,40 +95,98 @@ public class ProfileMetadataMerger {
 			e.printStackTrace();
 		}
 	}
-	/*if(tempDest != null && tempDest.containsKey(tempstr1) ) {
-								String tempS = tempSor.get(tempstr1);
-								if(tempDest.get(tempstr1).equals(tempSor.get(tempstr1))){//enableTrue
-									recProfile.setName(tempstr1);//TODO Get Profile Elements and update
-									recProfile.setEnabled(tempSor.get(tempstr1));
-								}
-							}
-							else {
-								recProfile.setName(tempstr1);
-								recProfile.setEnabled(tempSor.get(tempstr1));
-
-							}**/
 	public void updateDestinationXml( ArrayList<UpdateProfileWrapElements> destinationMetadataWrapNew, File destinationFile) {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document docDestinationFile = dBuilder.parse(destinationFile);
 			docDestinationFile.getDocumentElement().normalize();
-
+			NodeList nList;
+			//Element root = docDestinationFile.getDocumentElement();
 			for(UpdateProfileWrapElements tempTypes: destinationMetadataWrapNew){
+				//Removing
+				Set<ProfileElements> tempProfileValuesToRemove = tempTypes.getProfileSetRemove();
+				if(tempProfileValuesToRemove.size() >0) {
+					if(tempTypes.getNameType().equals("classAccesses")) { 
+						nList = docDestinationFile.getElementsByTagName(tempTypes.getNameType());
+						for(ProfileElements tempProfile : tempProfileValuesToRemove) {
+							for (int temp = 0; temp < nList.getLength(); temp++) {
+								Node nNode = nList.item(temp);
+								if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+									Element eElement = (Element) nNode;
+									if (eElement.getElementsByTagName("apexClass").item(0).getTextContent().equals((tempProfile.getName()))) {
+										nNode.getParentNode().removeChild(nNode);
+									}
+								}
+							}
+						}
+					}
+					if(tempTypes.getNameType().equals("pageAccesses")) { 
+						nList = docDestinationFile.getElementsByTagName(tempTypes.getNameType());
+						for(ProfileElements tempProfile : tempProfileValuesToRemove) {
+							for (int temp = 0; temp < nList.getLength(); temp++) {
+								Node nNode = nList.item(temp);
+								if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+									Element eElement = (Element) nNode;
+									if (eElement.getElementsByTagName("apexPage").item(0).getTextContent().equals((tempProfile.getName()))) {
+										nNode.getParentNode().removeChild(nNode);
+									}
+								}
+							}
+						}
+					}
+					if(tempTypes.getNameType().equals("userPermissions")) { 
+						nList = docDestinationFile.getElementsByTagName(tempTypes.getNameType());
+						for(ProfileElements tempProfile : tempProfileValuesToRemove) {
+							for (int temp = 0; temp < nList.getLength(); temp++) {
+								Node nNode = nList.item(temp);
+								if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+									Element eElement = (Element) nNode;
+									if (eElement.getElementsByTagName("name").item(0).getTextContent().equals((tempProfile.getName()))) {
+										nNode.getParentNode().removeChild(nNode);
+									}
+								}
+							}
+						}
+					}
+				}
+				//Adding
 				Set<ProfileElements> tempProfileValuesToAdd = tempTypes.getProfileSet();
 				if(tempProfileValuesToAdd.size() >0) {
 					for(ProfileElements tempProfile : tempProfileValuesToAdd) {
 						if(tempProfile.getName() != null && tempProfile.getEnabled() != null){
 							System.out.println("Name + " + tempProfile.getName() + " Enabled + " + tempProfile.getEnabled());
 							Element root = docDestinationFile.getDocumentElement();
-							Element name = docDestinationFile.createElement("classAccesses");
-							Element apexClass = docDestinationFile.createElement("apexClass");
-							apexClass.appendChild(docDestinationFile.createTextNode(tempProfile.getName())); 
-							Element apexClassEnable = docDestinationFile.createElement("enabled");
-							apexClassEnable.appendChild(docDestinationFile.createTextNode(tempProfile.getEnabled()));
-							name.appendChild(apexClass);
-							name.appendChild(apexClassEnable);
-							root.appendChild(name);	
+							if(tempTypes.getNameType().equals("classAccesses")) {
+								Element name = docDestinationFile.createElement("classAccesses");
+								Element apexClass = docDestinationFile.createElement("apexClass");
+								apexClass.appendChild(docDestinationFile.createTextNode(tempProfile.getName())); 
+								Element apexClassEnable = docDestinationFile.createElement("enabled");
+								apexClassEnable.appendChild(docDestinationFile.createTextNode(tempProfile.getEnabled()));
+								name.appendChild(apexClass);
+								name.appendChild(apexClassEnable);
+								root.appendChild(name);	
+							}
+							if(tempTypes.getNameType().equals("pageAccesses")) {
+								Element name = docDestinationFile.createElement("pageAccesses");
+								Element apexPage = docDestinationFile.createElement("apexPage");
+								apexPage.appendChild(docDestinationFile.createTextNode(tempProfile.getName())); 
+								Element apexPageEnable = docDestinationFile.createElement("enabled");
+								apexPageEnable.appendChild(docDestinationFile.createTextNode(tempProfile.getEnabled()));
+								name.appendChild(apexPage);
+								name.appendChild(apexPageEnable);
+								root.appendChild(name);	
+							}
+							if(tempTypes.getNameType().equals("userPermissions")) {
+								Element name = docDestinationFile.createElement("userPermissions");
+								Element apexPage = docDestinationFile.createElement("name");
+								apexPage.appendChild(docDestinationFile.createTextNode(tempProfile.getName())); 
+								Element apexPageEnable = docDestinationFile.createElement("enabled");
+								apexPageEnable.appendChild(docDestinationFile.createTextNode(tempProfile.getEnabled()));
+								name.appendChild(apexPage);
+								name.appendChild(apexPageEnable);
+								root.appendChild(name);	
+							}
 						}
 					}
 				}	
