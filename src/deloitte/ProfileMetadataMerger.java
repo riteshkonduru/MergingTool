@@ -72,7 +72,7 @@ public class ProfileMetadataMerger {
 
 			//null check for source and destination maps
 			if(sourceMetadataMap != null && destinationMetadataMap != null ) {//Map<classAccesses, Map<TestClass3Name, enableTrue>>
-				Set<String> tempSourceMetadataMap = sourceMetadataMap.keySet();//tempSource == classAccesses,pageAccesses,userPermissions
+				Set<String> tempSourceMetadataMap = sourceMetadataMap.keySet();//tempSourceMetadataMap == classAccesses,pageAccesses,userPermissions
 				System.out.println("tempSourceMetadataMap " + tempSourceMetadataMap.size() + "  " + tempSourceMetadataMap);
 
 				for(String tempMetaDataTypeSource: tempSourceMetadataMap) {//tempStr == classAccesses
@@ -106,15 +106,16 @@ public class ProfileMetadataMerger {
 								}//equals 
 
 							}//tempDestMetaDataElements
-
+							
 						}//tempDestMetaDataElements null check
 
 					}//tempSorMetaDataElements
-
+					
 					// these debugs will provide us info related to meta-data elements related to a type 
 					// where these maps are used to compare newly added elements in source
-					System.out.println("mapForNewMetadataSource  + " + mapForNewMetadataSource.size() + "  " + mapForNewMetadataSource);
-					System.out.println("mapForNewMetadataDest  + " + mapForNewMetadataDest.size() + "  " + mapForNewMetadataDest);
+					System.out.println("mapForNewMetadataSource  + " + " " + tempMetaDataTypeSource + " " + mapForNewMetadataSource.size() + "  " + mapForNewMetadataSource);
+					System.out.println("mapForNewMetadataDest  + " + " " + tempMetaDataTypeSource + " " + mapForNewMetadataDest.size() + "  " + mapForNewMetadataDest);
+
 
 					//for loop for source to add newly added tags.
 					for(String tempStrTOAddNewSrc: mapForNewMetadataSource.keySet()) {
@@ -126,6 +127,17 @@ public class ProfileMetadataMerger {
 						}//contains key
 
 					}//for mapForNewMetadataSource
+					
+					//for loop for destination to remove tags which are not present in source.
+					for(String tempToRemoveFrDest: mapForNewMetadataDest.keySet()) {
+
+						if(!mapForNewMetadataSource.containsKey(tempToRemoveFrDest)) {
+
+							metadataRecSetToRemove.add(mapForNewMetadataDest.get(tempToRemoveFrDest));
+
+						}//contains key
+
+					}//for mapForNewMetadataDest
 
 					//clearing map, later to add now elements related to new other meta-data types in the loop.
 					mapForNewMetadataSource.clear();
@@ -350,7 +362,7 @@ public class ProfileMetadataMerger {
 			}
 		}
 		if(setProfileElements.size() > 0) {
-			System.out.println( "\n mapNodeElementData "+ keyType + " " +setProfileElements.size());
+			System.out.println( "mapNodeElementData "+ keyType + " " +setProfileElements.size());
 			mapNodeData.put(keyType,setProfileElements);
 		}
 		return mapNodeData;
