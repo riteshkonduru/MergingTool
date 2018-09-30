@@ -1,5 +1,8 @@
 package deloitte;
-
+/*
+ * This Wrapper class is useful to hold meta-data Records for profile.
+ * 
+ * */
 public class ProfileElements {
 
     private String name;

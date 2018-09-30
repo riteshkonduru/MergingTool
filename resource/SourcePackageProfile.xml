@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Profile xmlns="http://soap.sforce.com/2006/04/metadata">
+
     <classAccesses>
-        <apexClass>Case1TitleSearchController</apexClass>
+        <apexClass>TestClass</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>TestClass1</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TestClass2</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
      <classAccesses>
-        <apexClass>ChangePasswordController</apexClass>
-        <enabled>false</enabled>
+        <apexClass>TestClass5</apexClass>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>Ritesh</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>Ritesh2</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-   <!-- <classAccesses>
         <apexClass>ChangePasswordControllerTest</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
 
     
     <pageAccesses>
         <apexPage>AnswersHome</apexPage>
-        <enabled>false</enabled>
+        <enabled>fasle</enabled>
     </pageAccesses>
-    <pageAccesses>
+            <pageAccesses>
         <apexPage>TestPage</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
@@ -35,7 +36,6 @@
         <enabled>false</enabled>
     </pageAccesses>
 
-    
     <userPermissions>
         <enabled>true</enabled>
         <name>ActivateContract</name>
@@ -57,8 +57,8 @@
         <name>ManageEmailClientConfig</name>
     </userPermissions>
     <userPermissions>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
         <name>ManageExchangeConfig</name>
-    </userPermissions>-->
+    </userPermissions>
     
 </Profile>
