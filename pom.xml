@@ -3,6 +3,18 @@
   <groupId>MergingTool</groupId>
   <artifactId>MergingTool</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  	<dependencies>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
+		</dependency>
+	</dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>

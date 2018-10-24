@@ -36,7 +36,7 @@ public class ProfileMetadataMerger {
 	 * 
 	 * */
 	public static void main(String[] args) {
-		try {
+		try { 
 
 			ProfileMetadataMerger objProfileMetaDataMerger = new ProfileMetadataMerger();
 

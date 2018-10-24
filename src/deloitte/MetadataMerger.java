@@ -18,8 +18,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-//TODO try for multiple tags.
-//TODO only add new tags which got created.
 
 public class MetadataMerger {
 
@@ -87,7 +85,7 @@ public class MetadataMerger {
 			rootElement.appendChild(type);
 			//Version element
 			Element version = doc.createElement("version");
-			version.appendChild(doc.createTextNode("41.0"));//TODO
+			version.appendChild(doc.createTextNode("41.0"));
 			rootElement.appendChild(version);
 
 			if(destinationMetadataMap != null) {
