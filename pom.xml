@@ -4,6 +4,12 @@
 	<groupId>MergingTool</groupId>
 	<artifactId>MergingTool</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<spring.version>4.2.1.RELEASE</spring.version>
+		<jdk.version>1.8</jdk.version>
+		<logback.version>1.1.3</logback.version>
+		<jcl.slf4j.version>1.7.12</jcl.slf4j.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
